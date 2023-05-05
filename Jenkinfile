@@ -1,0 +1,21 @@
+node{
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), pipelineTriggers([pollSCM('* * * * *')])])
+    def mavenHome = tool name: "maven3.8.6"
+    stage('checkoutcode'){
+     git branch: 'development', credentialsId: '515da19b-bdfc-4706-88ab-f19c82508c58', url: 'https://github.com/Yupendra90/maven-web-application.git'   
+    }
+    stage('Build'){
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage('ExecuteSonarReport'){
+        sh "${mavenHome}/bin/mvn clean sonar:sonar"
+    }
+    stage('UploadArtifactinRepos'){
+        sh "${mavenHome}/bin/mvn clean deploy"
+    }
+    stage('DeployToserver'){
+        sshagent(['8dcad4b6-4a21-40de-a24c-15fb9e794f1d']) {
+        sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.4.225:/opt/apache-tomcat-9.0.74/webapps/"
+}
+    }
+}
