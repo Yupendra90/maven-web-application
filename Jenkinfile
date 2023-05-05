@@ -19,7 +19,8 @@ node{
         sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.4.225:/opt/apache-tomcat-9.0.74/webapps/"
 }
     }
-   catch(e) {
+    }
+   catch(e){
             slackNotifications(currentBuild.result)
             throw e
 }
